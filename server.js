@@ -25,7 +25,7 @@ app.post('/login', (req, res) => {
                 return res.status(500).send("Hashing error");
             }
             if(same) {
-                return res.send("Login OK");
+                return res.json({userId: results[0].id});
             }
             return res.status(401).send("Wrong password");
         });
