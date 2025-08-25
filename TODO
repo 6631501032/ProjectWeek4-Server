@@ -1,6 +1,6 @@
 Backend Service of Datadase
-[Progress] Dev 1 Implement loginUser(username, password)
-[Progress] Dev 2 Implement getAllExpenses(userid)
-[Progress] Dev 2 Implement getTodayExpenses(userid)
+[Done] Dev 1 Implement loginUser(username, password)
+[Done] Dev 2 Implement getAllExpenses(userid)
+[Done] Dev 2 Implement getTodayExpenses(userid)
 [Progress] Dev 3 Implement addExpense(userid, item, paid)
 [Progress] Dev 3 Implement deleteExpense(expenseid, userid)
