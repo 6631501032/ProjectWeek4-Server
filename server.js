@@ -31,23 +31,26 @@ function requireAuth(req, res, next) {
 // ===== add-expense =====
 app.post('/add-expense', (req, res) => {
     const { user_id, item, paid } = req.body;
-    if (!user_id || !item || !paid) {
-        return res.status(400).send("Missing required fields: user_id, item, or paid.");
+  
+    // แยกกรณี paid=0 ออกจาก "ไม่มีค่า"
+    if (user_id == null || user_id === '' || !item || item.trim() === '' ||
+        paid === undefined || paid === null || paid === '') {
+      return res.status(400).send("Missing required fields: user_id, item, or paid.");
     }
-
+  
     const sql = "INSERT INTO expense (user_id, item, paid, date) VALUES (?, ?, ?, NOW())";
     con.query(sql, [user_id, item, paid], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send("Database server error");
-        }
-        if (result.affectedRows === 1) {
-            return res.status(200).send("Expense added successfully.");
-        } else {
-            return res.status(500).send("Failed to add expense.");
-        }
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Database server error");
+      }
+      if (result.affectedRows === 1) {
+        return res.status(200).send("Expense added successfully.");
+      } else {
+        return res.status(500).send("Failed to add expense.");
+      }
     });
-});
+  });  
 
 // ===== delete-expense =====
 app.delete('/delete-expense/:id', requireAuth, (req, res) => {
