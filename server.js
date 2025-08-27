@@ -60,27 +60,6 @@ app.post('/login', (req, res) => {
     })
 });
 
-const jwt = require('jsonwebtoken');
-// ===== Middleware check JWT =====
-function requireAuth(req, res, next) {
-  const auth = req.headers.authorization || '';
-  const [scheme, token] = auth.split(' ');
-  if (scheme !== 'Bearer' || !token) {
-    return res.status(401).send("Missing or invalid Authorization header.");
-  }
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = payload.sub ?? payload.user_id ?? payload.id;
-    if (!userId) {
-      return res.status(401).send("Invalid token payload.");
-    }
-    req.user = { id: userId };
-    next();
-  } catch (err) {
-    return res.status(401).send("Invalid or expired token.");
-  }
-}
-
 // ===== add-expense =====
 app.post('/add-expense', (req, res) => {
     const { user_id, item, paid } = req.body;
@@ -106,15 +85,19 @@ app.post('/add-expense', (req, res) => {
   });  
 
 // ===== delete-expense =====
-app.delete('/delete-expense/:id', requireAuth, (req, res) => {
-    const expenseId = req.params.id;
-    if (!expenseId) {
-        return res.status(400).send("Missing expense ID.");
+app.delete('/delete-expense/:id', (req, res) => {
+    const expenseId = parseInt(req.params.id, 10);
+    const userId = req.body.user_id; // รับจาก body
+
+    if (isNaN(expenseId)) {
+        return res.status(400).send("Invalid expense ID.");
+    }
+    if (!userId) {
+        return res.status(400).send("Missing user ID.");
     }
 
-    // Bind the deletion to user_id from the token.
     const sql = "DELETE FROM expense WHERE id = ? AND user_id = ?";
-    con.query(sql, [expenseId, req.user.id], (err, result) => {
+    con.query(sql, [expenseId, userId], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).send("Database server error");
@@ -126,6 +109,7 @@ app.delete('/delete-expense/:id', requireAuth, (req, res) => {
         }
     });
 });
+
 
 //============================ Server starts here ============================
 const PORT = 3000;
